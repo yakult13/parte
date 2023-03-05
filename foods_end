@@ -1,0 +1,40 @@
+#!/bin/bash
+
+function service() {
+wget -q -O /usr/sbin/yakult https://github.com/yakult13/ws/raw/main/service_8280.py
+chmod +x /usr/sbin/yakult
+
+cat << END > /lib/systemd/system/yakult.service
+[Unit]
+Description=Yakult
+Documentation=https://google.com
+After=network.target nss-lookup.target
+[Service]
+Type=simple
+User=root
+NoNewPrivileges=true
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/python -O /usr/sbin/yakult
+ProtectSystem=true
+ProtectHome=true
+RemainAfterExit=yes
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl enable yakult
+systemctl restart yakult
+}
+
+function slow() {
+apt update; apt upgrade -y; rm -rf install; wget https://raw.githubusercontent.com/xamjyss143/slow-dns/main/install; chmod +x install; ./install
+bash /etc/slowdns/slowdns-ssh
+startdns
+}
+
+service
+slow
+
+clear
