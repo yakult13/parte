@@ -1,0 +1,22 @@
+cat <<'VPN2' > /etc/openvpn/server/auth.sh
+#!/bin/bash
+
+DB_USER="carlos"
+DB_PASSWORD="rdxiNA3WXwfRAjdm"
+DB_NAME="carlos"
+REMOTE="204.44.123.210"
+TABLE="ovpn_users"
+
+USERNAME=$(head -n 1 $1)
+PASSWORD=$(head -n 2 $1 | tail -n 1)
+
+QUERY="SELECT COUNT(*) FROM $TABLE WHERE username='$USERNAME' AND password='$PASSWORD';"
+RESULT=$(mysql -u $DB_USER -p$DB_PASSWORD -h $REMOTE -D $DB_NAME -se "$QUERY")
+
+if [ "$RESULT" -eq 1 ]; then
+    exit 0
+else
+    exit 1
+fi
+VPN2
+chmod +x /etc/openvpn/server/auth.sh
